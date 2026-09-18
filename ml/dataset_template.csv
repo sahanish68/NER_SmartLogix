@@ -1,0 +1,6 @@
+rainfall_mm,previous_rainfall_mm,slope_deg,elevation_m,road_condition_score,traffic_score,river_level_score,historical_incidents_30d,disrupted
+10,20,5,100,1,1,1,0,0
+30,40,10,300,2,2,2,1,0
+80,100,25,800,3,4,4,3,1
+140,180,35,1500,4,5,5,7,1
+200,250,40,1800,5,5,5,10,1
