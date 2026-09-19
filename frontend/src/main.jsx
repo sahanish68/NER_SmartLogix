@@ -21,6 +21,14 @@ function Stat({label,value,alert=false}) {
   return <div className={`stat ${alert?"alert":""}`}><small>{label}</small><strong>{value}</strong></div>
 }
 
+function ThemeToggle(){
+  const [theme,setTheme]=useState(()=>localStorage.getItem("smartlogix_theme")||"dark");
+  useEffect(()=>{document.documentElement.dataset.theme=theme; localStorage.setItem("smartlogix_theme",theme)},[theme]);
+  const themes=["dark","light","mint"];
+  const next=themes[(themes.indexOf(theme)+1)%themes.length];
+  return <button className="theme-toggle" type="button" onClick={()=>setTheme(next)} aria-label={`Switch to ${next} theme`} title={`Switch to ${next} theme`}><span className={`theme-swatch ${theme}`}></span><span>{theme}</span><b>↻</b></button>
+}
+
 function Dashboard({setPage}) {
   const [d,setD]=useState(null); const [roads,setRoads]=useState([]); const [vehicles,setVehicles]=useState([]);
   useEffect(()=>{Promise.all([api("/dashboard"),api("/roads"),api("/vehicles")]).then(([a,b,c])=>{setD(a);setRoads(b);setVehicles(c)})},[]);
@@ -133,9 +141,9 @@ function App(){
   function logout(){localStorage.removeItem("smartlogix_user"); if(supabaseConfigured) supabase.auth.signOut(); setUser(null)}
   useEffect(()=>{if(!supabaseConfigured){try{setUser(JSON.parse(localStorage.getItem("smartlogix_user")))}catch{} return;} supabase.auth.getSession().then(({data})=>{if(data.session){const authUser=data.session.user; const fallback=localStorage.getItem("smartlogix_pending_role")||"customer"; login({id:authUser.id,email:authUser.email,role:authUser.user_metadata?.role||fallback}); localStorage.removeItem("smartlogix_pending_role")} setAuthReady(true)}); const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{if(!session){setUser(null);return;} const authUser=session.user; const fallback=localStorage.getItem("smartlogix_pending_role")||"customer"; login({id:authUser.id,email:authUser.email,role:authUser.user_metadata?.role||fallback})}); return ()=>subscription.unsubscribe()},[]);
   if(!authReady) return <div className="auth-loading"><span></span>Connecting to secure workspace…</div>;
-  if(!user) return <Login onLogin={login}/>;
-  if(user.role==="customer") return <CustomerPortal user={user} onLogout={logout}/>;
-  if(user.role==="driver") return <DriverPortal user={user} onLogout={logout}/>;
-  return <AdminWorkspace user={user} onLogout={logout}/>;
+  if(!user) return <><div className="global-theme"><ThemeToggle/></div><Login onLogin={login}/></>;
+  if(user.role==="customer") return <><div className="global-theme"><ThemeToggle/></div><CustomerPortal user={user} onLogout={logout}/></>;
+  if(user.role==="driver") return <><div className="global-theme"><ThemeToggle/></div><DriverPortal user={user} onLogout={logout}/></>;
+  return <><div className="global-theme"><ThemeToggle/></div><AdminWorkspace user={user} onLogout={logout}/></>;
 }
 createRoot(document.getElementById("root")).render(<App/>);
