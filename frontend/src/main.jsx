@@ -35,7 +35,7 @@ function Dashboard({setPage}) {
       <Stat label="High-risk corridors" value={d?.high_risk_corridors??"—"} alert/>
     </div>
     <section className="panel map-panel">
-      <h2>Live Accessibility Map</h2>
+      <div className="panel-head"><div><p className="section-kicker">REGIONAL OVERVIEW</p><h2>Live Accessibility Map</h2></div><span className="map-status"><i></i> Live feed</span></div>
       <MapContainer center={[25.7,91.5]} zoom={6} style={{height:"480px"}}>
         <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
         {roads.map(r=><CircleMarker key={r.id} center={[r.latitude,r.longitude]} radius={10} pathOptions={{color:r.risk_score>=65?"#ef4444":r.risk_score>=35?"#f59e0b":"#22c55e"}}>
@@ -53,7 +53,7 @@ function Incidents(){
   const [items,setItems]=useState([]); const [form,setForm]=useState({type:"LANDSLIDE",severity:"HIGH",latitude:"25.58",longitude:"91.89",description:""});
   const load=()=>api("/incidents").then(setItems); useEffect(load,[]);
   async function submit(e){e.preventDefault(); await api("/incidents",{method:"POST",body:JSON.stringify({...form,latitude:+form.latitude,longitude:+form.longitude})}); setForm({...form,description:""}); load();}
-  return <div><h1>Field Incident Reporting</h1><div className="grid2"><form className="panel form" onSubmit={submit}>
+  return <div><div className="page-heading"><div><p className="section-kicker">FIELD OPERATIONS</p><h1>Incident reporting</h1><p>Capture road disruption signals directly from the field.</p></div><span className="page-mark">01</span></div><div className="grid2"><form className="panel form" onSubmit={submit}>
     <label>Incident type<select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}><option>LANDSLIDE</option><option>FLOOD</option><option>ROAD_DAMAGE</option><option>BRIDGE_DAMAGE</option><option>TRAFFIC</option></select></label>
     <label>Severity<select value={form.severity} onChange={e=>setForm({...form,severity:e.target.value})}><option>LOW</option><option>MEDIUM</option><option>HIGH</option></select></label>
     <label>Latitude<input value={form.latitude} onChange={e=>setForm({...form,latitude:e.target.value})}/></label>
@@ -65,21 +65,21 @@ function Incidents(){
 
 function Vehicles(){
   const [items,setItems]=useState([]); useEffect(()=>{api("/vehicles").then(setItems)},[]);
-  return <div><h1>Vehicle Tracking</h1><div className="cards">{items.map(v=><div className="panel" key={v.id}><h2>🚚 {v.vehicle_number}</h2><p>Driver ID: {v.driver_id ?? "Unassigned"}</p><p>Status: <b>{v.status}</b></p><p>GPS: {v.latitude?.toFixed(4) ?? "—"}, {v.longitude?.toFixed(4) ?? "—"}</p><p>Speed: {v.speed ?? 0} km/h</p></div>)}</div></div>
+  return <div><div className="page-heading"><div><p className="section-kicker">FLEET CONTROL</p><h1>Vehicle tracking</h1><p>Keep every vehicle, driver, and signal in view.</p></div><span className="page-mark">02</span></div><div className="cards">{items.map(v=><div className="panel vehicle-card" key={v.id}><div className="vehicle-top"><h2>🚚 {v.vehicle_number}</h2><span className="status-pill">{v.status}</span></div><p>Driver ID: {v.driver_id ?? "Unassigned"}</p><p>GPS: {v.latitude?.toFixed(4) ?? "—"}, {v.longitude?.toFixed(4) ?? "—"}</p><div className="vehicle-speed"><strong>{v.speed ?? 0}</strong><span>km/h current speed</span></div></div>)}</div></div>
 }
 
 function AI(){
   const [f,setF]=useState({rainfall:120,previous_rainfall:160,slope:30,elevation:1000,road_condition:4,traffic:4,river_level:4,historical_incidents:5});
   const [result,setResult]=useState(null);
   const run=()=>api("/ai/risk",{method:"POST",body:JSON.stringify(f)}).then(setResult);
-  return <div><h1>AI Disruption Prediction</h1><div className="grid2"><div className="panel form">{Object.entries(f).map(([k,v])=><label key={k}>{k.replaceAll("_"," ")}<input type="number" value={v} onChange={e=>setF({...f,[k]:+e.target.value})}/></label>)}<button onClick={run}>Predict Route Risk</button></div><div className="panel result"><h2>Prediction</h2>{result?<><div className="risk">{result.risk_probability}%</div><h2>{result.risk_level} RISK</h2><p>Use this score as a prototype signal; production deployment requires validated regional historical data.</p></>:<p>Enter environmental and operational features, then run the model.</p>}</div></div></div>
+  return <div><div className="page-heading"><div><p className="section-kicker">DECISION SUPPORT</p><h1>Route risk analytics</h1><p>Model disruption probability from environmental and operational signals.</p></div><span className="page-mark">03</span></div><div className="grid2"><div className="panel form"><div className="panel-title"><h2>Risk inputs</h2><span>8 signals</span></div>{Object.entries(f).map(([k,v])=><label key={k}>{k.replaceAll("_"," ")}<input type="number" value={v} onChange={e=>setF({...f,[k]:+e.target.value})}/></label>)}<button onClick={run}>Predict route risk</button></div><div className="panel result"><p className="section-kicker">MODEL OUTPUT</p><h2>Prediction</h2>{result?<><div className="risk">{result.risk_probability}%</div><h2>{result.risk_level} risk</h2><p>Prototype signal based on the current route conditions.</p></>:<p>Enter the route conditions, then run the model.</p>}</div></div></div>
 }
 
 function Deliveries(){
   const [items,setItems]=useState([]); const [form,setForm]=useState({vehicle_id:1,cargo_type:"MEDICINES",origin:"Guwahati",destination:"Remote District",priority:"CRITICAL"});
   const load=()=>api("/deliveries").then(setItems); useEffect(load,[]);
   async function submit(e){e.preventDefault(); await api("/deliveries",{method:"POST",body:JSON.stringify({...form,vehicle_id:+form.vehicle_id})});load();}
-  return <div><h1>Essential Deliveries</h1><div className="grid2"><form className="panel form" onSubmit={submit}>
+  return <div><div className="page-heading"><div><p className="section-kicker">LAST-MILE OPERATIONS</p><h1>Essential deliveries</h1><p>Coordinate priority cargo from origin to destination.</p></div><span className="page-mark">04</span></div><div className="grid2"><form className="panel form" onSubmit={submit}>
     <label>Vehicle ID<input type="number" value={form.vehicle_id} onChange={e=>setForm({...form,vehicle_id:e.target.value})}/></label>
     <label>Cargo<select value={form.cargo_type} onChange={e=>setForm({...form,cargo_type:e.target.value})}><option>MEDICINES</option><option>FOOD</option><option>AGRICULTURAL_PRODUCE</option><option>CONSTRUCTION_MATERIAL</option></select></label>
     <label>Origin<input value={form.origin} onChange={e=>setForm({...form,origin:e.target.value})}/></label>
@@ -93,7 +93,7 @@ function Deliveries(){
 function Emergency(){
   const [active,setActive]=useState(false);
   const toggle=()=>api("/emergency/toggle",{method:"POST"}).then(x=>setActive(x.emergency_mode));
-  return <div><div className={`emergency ${active?"active":""}`}><h1>🚨 Emergency Operations</h1><p>{active?"Emergency mode is ACTIVE. Prioritize medical and food deliveries and monitor high-risk corridors.":"Emergency mode is currently off."}</p><button onClick={toggle}>{active?"Deactivate":"Activate"} Emergency Mode</button></div><div className="panel"><h2>Emergency playbook</h2><ol><li>Verify field incidents and road closures.</li><li>Prioritize medicines, food and rescue supplies.</li><li>Recalculate affected delivery routes.</li><li>Publish multilingual alerts through approved channels.</li><li>Keep an auditable incident and decision log.</li></ol></div></div>
+  return <div><div className="page-heading"><div><p className="section-kicker">RESPONSE CENTER</p><h1>Emergency operations</h1><p>Coordinate critical action when routes and communities are under pressure.</p></div><span className="page-mark">05</span></div><div className={`emergency ${active?"active":""}`}><h1>🚨 {active?"Emergency mode active":"Emergency mode is off"}</h1><p>{active?"Prioritize medical and food deliveries and monitor high-risk corridors.":"Activate the response mode to bring critical routes and supplies to the front of the queue."}</p><button onClick={toggle}>{active?"Deactivate":"Activate"} emergency mode</button></div><div className="panel playbook"><div className="panel-title"><h2>Emergency playbook</h2><span>5 actions</span></div><ol><li>Verify field incidents and road closures.</li><li>Prioritize medicines, food and rescue supplies.</li><li>Recalculate affected delivery routes.</li><li>Publish multilingual alerts through approved channels.</li><li>Keep an auditable incident and decision log.</li></ol></div></div>
 }
 
 function Login({onLogin}){
